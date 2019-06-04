@@ -4,6 +4,17 @@ This web application mirrors a MIDI keyboard so that low-pitch keys are on the r
 
 It is based on [WebMIDI](https://developer.mozilla.org/en-US/docs/Web/API/MIDIAccess#Browser_compatibility) which is, as of today (2019-06), only supported by Chrome.
 
+## Usage
+
+In _input_ combobox select the input port corresponding to your MIDI keyboard.
+
+In _output_ combobox select the MIDI output port corresponding to the MIDI instrument used to generate sounds.
+
+If you are using a digital piano then _input_ and _output_ may point to the same instrument.  
+To prevent the instrument from generating two notes for each key, the usual note and the mirrored note, **you need to disable the instrument's _Local Control_**. Usually this is available in the instrument's menu.  
+On some instruments the local control can be disabled by sending a MIDI event. If this is the case then pressing the _Disable_ button in this application will disable it.  
+For other instruments you will have to use the instruments' buttons to disable the local control.
+
 ## License
 
 Copyright (C) 2019 Stéphane SOPPERA.
