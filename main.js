@@ -19,6 +19,74 @@
 "use strict";
 
 (function() {
+  // Returns the data as a string of hexadecimal like 0A.
+  function data_str(data) {
+    return Array.from(data).map(n => n.toString(16).toUpperCase().padStart(2, "0")).join(" ");
+  }
+
+  const octave_notes = [
+    "C", "C#",
+    "D", "D#",
+    "E",
+    "F", "F#",
+    "G", "G#",
+    "A", "A#",
+    "B",
+  ];
+  
+  // Returns the MIDI note name base on the note byte of the MIDI event.
+  function note_name(note_byte) {
+    if (note_byte < 0) {
+      return note_byte.toString();
+    }
+    const offset = note_byte % 12;
+    const octave = ((note_byte - offset) / 12) - 1;
+    return `${octave_notes[offset]}${octave}`
+  }
+
+  // Returns the string version of the input MIDI data.
+  function format_midi_data(data) {
+    if (data.length === 0) {
+      return "<empty>";
+    }
+
+    const status_byte = data[0];
+    const message_type = status_byte & 0xf0;
+    const channel = (message_type !== 0xF0
+                     ? (status_byte & 0xf) + 1
+                     : 0);
+    switch (message_type) {
+    case 0x90:        // Note On
+      if (data.length !== 3) { return data_str(data); }
+      return `[${channel}] note-on  ${note_name(data[1])} v:${data[2]}`;
+    case 0x80:        // Note Off
+      if (data.length !== 3) { return data_str(data); }
+      return `[${channel}] note-off ${note_name(data[1])} v:${data[2]}`;
+    case 0xA0:        // Poly Key pressure
+      if (data.length !== 3) { return data_str(data); }
+      return `[${channel}] poly-key-pressure ${note_name(data[1])} p:${data[2]}`
+    case 0xB0:        // Control Change
+      if (data.length !== 3) { return data_str(data); }
+      return `[${channel}] control-change c:${data[1]} v:${data[2]}`;
+    case 0xC0:        // Program Change
+      if (data.length !== 2) {
+        return data_str(data);
+      }
+      return `[${channel}] program-change ${data[1]}`;
+    case 0xD0:        // Channel pressure
+      if (data.length !== 2) { return data_str(data); }
+      return `[${channel}] channel-pressure p:${data[1]}`;
+    case 0xE0:        // Pitch Bend
+      {
+        if (data.length !== 3) { return data_str(data); }
+        const bend = ((data[2] << 7) | data[1]) - 0x2000;
+        return `[${channel}] pitch-bend b:${bend}`;
+      }
+    default:
+      return data_str(data);
+    }
+  }
+  
   // A filter that redirects all event received from `in_port`
   // `MIDIInput` to `out_port` `MIDIOutput`, mirror the note of note
   // on/off events.
@@ -61,17 +129,17 @@
         data = new Uint8Array(data);
         let n = 124 - data[1];
         if (n < 0) {
-          add_to_log(`ignoring event ${data} since the mirrored note ${n} is out of range`)
+          add_to_log(`ignoring event ${format_midi_data(data)} since the mirrored note ${n} is out of range`)
           return;
         }
         data[1] = n;
         if (log_midi_events_input.checked) {
-          add_to_log(`MIDI event: ${e.data} → ${data}`);
+          add_to_log(`MIDI event: ${format_midi_data(e.data)} → ${format_midi_data(data)}`);
         }
         break;
       default:
         if (log_midi_events_input.checked) {
-          add_to_log(`MIDI event: ${data}`);
+          add_to_log(`MIDI event: ${format_midi_data(data)}`);
         }
         break;
       }
@@ -152,6 +220,7 @@
   const log_midi_events_input = document.getElementById("log-midi-events");
   const input_port_key = "input_port";
   const output_port_key = "output_port";
+  const log_midi_events_key = "log_midi_events";
 
   // Add the given message at the top of the log.
   function add_to_log(msg) {
@@ -164,7 +233,10 @@
     const s = now.getSeconds().toString().padStart(2, "0");
     const ms = now.getMilliseconds().toString().padStart(3, "0");
     const timestamp = `${Y}-${M}-${D} ${h}:${m}:${s}.${ms}`;
-    const log_line = document.createTextNode(`[${timestamp}] ${msg}`);
+    const log_line_text = document.createTextNode(`[${timestamp}] ${msg}`);
+    const log_line = document.createElement("span");
+    log_line.className = "log-msg";
+    log_line.appendChild(log_line_text);
     log.insertBefore(document.createElement("br"), log.firstChild);
     log.insertBefore(log_line, log.firstChild);
   }
@@ -187,7 +259,7 @@
     data[0] = 0xb0;             // Mode message.
     data[1] = 122;              // Local Control.
     data[2] = on ? 127 : 0;     // On or Off.
-    add_to_log(`sending ${data} to try changing Local Control`)
+    add_to_log(`sending ${format_midi_data(data)} to try changing Local Control`)
     try {
       out_port.send(data);
     } catch (err) {
@@ -248,7 +320,17 @@
 
       // Bind click event for log.
       clear_log_button.addEventListener("click", clear_log);
-
+      // Set the value of log MIDI events and add a listener on
+      // changes.
+      log_midi_events_input.addEventListener(
+        "change",
+        e => localStorage.setItem(log_midi_events_key,
+                                  log_midi_events_input.checked.toString())
+      );
+      if (localStorage.getItem(log_midi_events_key) === "true") { 
+        log_midi_events_input.checked = true;
+      }
+      
       // Listen to connections & disconnections of MIDI ports.
       access.onstatechange = function(e) {
         console.log("state change:", midi_port_json(e.port));

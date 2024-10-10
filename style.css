@@ -68,3 +68,7 @@ button.off:active {
 #log {
     font-family: monospace;
 }
+
+.log-msg {
+    white-space: pre-wrap;
+}
