@@ -61,14 +61,25 @@
         data = new Uint8Array(data);
         let n = 124 - data[1];
         if (n < 0) {
-          console.log("ignoring out of range note:", n,
-                      " (created from", data[1], ")");
+          add_to_log(`ignoring event ${data} since the mirrored note ${n} is out of range`)
           return;
         }
         data[1] = n;
+        if (log_midi_events_input.checked) {
+          add_to_log(`MIDI event: ${e.data} → ${data}`);
+        }
+        break;
+      default:
+        if (log_midi_events_input.checked) {
+          add_to_log(`MIDI event: ${data}`);
+        }
         break;
       }
-      this.out_port.send(data);
+      try {
+        this.out_port.send(data);
+      } catch (err) {
+        add_to_log(`ERROR: sending MIDI to the output failed, ${err}`);
+      }
     }
   }
 
@@ -131,22 +142,57 @@
   }
 
   // The State. Set when MIDIAccess has been obtained.
-  var state = null;
-  var input_sel = document.getElementById("input-sel");
-  var output_sel = document.getElementById("output-sel");
-  var disable_local_control = document.getElementById("disable-local-control")
-  var enable_local_control = document.getElementById("enable-local-control")
+  let state = null;
+  const input_sel = document.getElementById("input-sel");
+  const output_sel = document.getElementById("output-sel");
+  const disable_local_control = document.getElementById("disable-local-control")
+  const enable_local_control = document.getElementById("enable-local-control")
+  const log = document.getElementById("log");
+  const clear_log_button = document.getElementById("clear-log");
+  const log_midi_events_input = document.getElementById("log-midi-events");
   const input_port_key = "input_port";
   const output_port_key = "output_port";
 
+  // Add the given message at the top of the log.
+  function add_to_log(msg) {
+    const now = new Date();
+    const Y = now.getFullYear();
+    const M = now.getMonth().toString().padStart(2, "0");
+    const D = now.getDate().toString().padStart(2, "0");
+    const h = now.getHours().toString().padStart(2, "0");
+    const m = now.getMinutes().toString().padStart(2, "0");
+    const s = now.getSeconds().toString().padStart(2, "0");
+    const ms = now.getMilliseconds().toString().padStart(3, "0");
+    const timestamp = `${Y}-${M}-${D} ${h}:${m}:${s}.${ms}`;
+    const log_line = document.createTextNode(`[${timestamp}] ${msg}`);
+    log.insertBefore(document.createElement("br"), log.firstChild);
+    log.insertBefore(log_line, log.firstChild);
+  }
+
+  // Remove all messages from the log.
+  function clear_log() {
+    while (log.lastChild !== null) {
+      log.removeChild(log.lastChild);
+    }
+  }
+
   function set_local_control(on) {
     var out_port = state.access.outputs.get(output_sel.value);
+    if (out_port === undefined) {
+      add_to_log(`ERROR: no output device selected!`);
+      return;
+    }
+
     var data = new Uint8Array(3);
     data[0] = 0xb0;             // Mode message.
     data[1] = 122;              // Local Control.
     data[2] = on ? 127 : 0;     // On or Off.
-    out_port.send(data);
-    console.log(data);
+    add_to_log(`sending ${data} to try changing Local Control`)
+    try {
+      out_port.send(data);
+    } catch (err) {
+      add_to_log(`ERROR: sending MIDI to the output failed, ${err}`);
+    }
   }
 
   // Removes `state.filter` and replaces it with a new one based on
@@ -196,9 +242,12 @@
 
       // Bind click events for the MIDI local control.
       disable_local_control.addEventListener(
-        "click", set_local_control.bind(null, false))
+        "click", set_local_control.bind(null, false));
       enable_local_control.addEventListener(
-        "click", set_local_control.bind(null, true))
+        "click", set_local_control.bind(null, true));
+
+      // Bind click event for log.
+      clear_log_button.addEventListener("click", clear_log);
 
       // Listen to connections & disconnections of MIDI ports.
       access.onstatechange = function(e) {
@@ -209,7 +258,7 @@
             state.filter !== null &&
             (state.filter.in_port.id === e.port.id ||
              state.filter.out_port.id === e.port.id)) {
-          console.log("disconnected port is part of the filter; remove the filter");
+          add_to_log(`port ${e.port.name} disconnected!`);
           state.filter.disconnect();
           state.filter = null;
         }
@@ -240,7 +289,7 @@
             output_sel.value !== "") {
           set_filter_from_sel();
           if (state.filter !== null) {
-            console.log("connected port is part of the filter; add the filter");
+            add_to_log(`port ${e.port.name} reconnected!`);
           }
         }
       };

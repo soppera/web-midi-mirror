@@ -29,6 +29,18 @@ button {
     border-radius: 4px;
 }
 
+button {
+    background: #666;
+}
+
+button:hover {
+    background: #999;
+}
+
+button:active {
+    background: #888;
+}
+
 button.on {
     background: #1a923a;
 }
@@ -51,4 +63,8 @@ button.off:hover {
 
 button.off:active {
     background: #a06269;
+}
+
+#log {
+    font-family: monospace;
 }
