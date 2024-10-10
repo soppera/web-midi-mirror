@@ -47,17 +47,17 @@
     }
     let data = e.data;
     switch (data[0] & 0xf0) {
-    case 0x90:		// note on
-    case 0x80:		// note off
-	  data = new Uint8Array(data);
-	  let n = 124 - data[1];
-	  if (n < 0) {
-	    console.log("ignoring out of range note:", n,
-		            " (created from", data[1], ")");
-	    return;
-	  }
-	  data[1] = n;
-	  break;
+    case 0x90:        // note on
+    case 0x80:        // note off
+      data = new Uint8Array(data);
+      let n = 124 - data[1];
+      if (n < 0) {
+        console.log("ignoring out of range note:", n,
+                    " (created from", data[1], ")");
+        return;
+      }
+      data[1] = n;
+      break;
     }
     this.out_port.send(data);
   };
@@ -96,7 +96,7 @@
 
   function set_local_control(on) {
     var out_port = outputs.get(output_sel.value);
-	var data = new Uint8Array(3);
+    var data = new Uint8Array(3);
     data[0] = 0xb0;             // Mode message.
     data[1] = 122;              // Local Control.
     data[2] = on ? 127 : 0;     // On or Off.
@@ -119,21 +119,21 @@
 
   navigator.requestMIDIAccess()
     .then(function(access) {
-	  inputs = access.inputs;
-	  outputs = access.outputs;
+      inputs = access.inputs;
+      outputs = access.outputs;
 
-	  fill_port_selector(input_sel, access.inputs, input_port_key);
-	  fill_port_selector(output_sel, access.outputs, output_port_key);
+      fill_port_selector(input_sel, access.inputs, input_port_key);
+      fill_port_selector(output_sel, access.outputs, output_port_key);
 
-	  onselchange()
-	  input_sel.addEventListener("change", onselchange);
-	  output_sel.addEventListener("change", onselchange);
+      onselchange()
+      input_sel.addEventListener("change", onselchange);
+      output_sel.addEventListener("change", onselchange);
 
       disable_local_control.addEventListener("click", set_local_control.bind(null, false))
       enable_local_control.addEventListener("click", set_local_control.bind(null, true))
 
-	  access.onstatechange = function(e) {
-	    console.log("state change:", e.port.name, e.port.manufacturer, e.port.state);
-	  };
+      access.onstatechange = function(e) {
+        console.log("state change:", e.port.name, e.port.manufacturer, e.port.state);
+      };
     });
 })()
