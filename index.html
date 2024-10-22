@@ -22,6 +22,8 @@ with web-midi-mirror. If not, see <https://www.gnu.org/licenses/>.
     <meta charset="utf-8">
     <title>Midi Keyboard Mirror</title>
     <link href="style.css" rel="stylesheet" type="text/css">
+    <script src="scripts/main.js" type="module"></script>
+    <script src="scripts/nomodules.js" nomodule></script>
   </head>
   <body>
     Input: <select id="input-sel"></select> →
@@ -30,6 +32,5 @@ with web-midi-mirror. If not, see <https://www.gnu.org/licenses/>.
     (not supported by all MIDI devices, e.g., Roland pianos)<br><br>
     Log: <button id="clear-log">Clear Log</button><input type="checkbox" id="log-midi-events"><label for="log-midi-events">Log MIDI Events</label><br>
     <div id="log"></div>
-    <script src="main.js"></script>
   </body>
 </html>

@@ -1,0 +1,10 @@
+{
+  "name": "web-midi-mirror",
+  "version": "1.0.0",
+  "description": "Mirror MIDI keyboard.",
+  "author": "Stéphane SOPPERA",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@types/webmidi": "^2.1.0"
+  }
+}
