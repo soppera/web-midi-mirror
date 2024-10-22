@@ -4,6 +4,30 @@ This web application mirrors a MIDI keyboard so that low-pitch keys are on the r
 
 It is based on [WebMIDI](https://developer.mozilla.org/en-US/docs/Web/API/MIDIAccess#Browser_compatibility) which is, as of today (2019-06), only supported by Chrome.
 
+## Compilation
+
+This project is written in TypeScript. It thus needs to be compilated.
+
+### TypeScript Compilation
+
+With the current directory at the root of the repository, run:
+
+* `npm install`: Install the TypeScript dependencies.
+* `tsc`: Runs the TypeScript compiler.
+
+This will create the `scripts/` folder that contains the compiled
+JavaScript files from the TypeScript files in `src/`.
+
+### Running Locally
+
+You need a web-server to be able to use WebMidi. The simplest one is
+the one included in Python. Simply run:
+
+`python3 -m http.server`
+
+This will run an HTTP server on port 8000 of all IP addresses of the
+machine. You can then visit http://127.0.0.1:8000 to access it.
+
 ## Usage
 
 In _input_ combobox select the input port corresponding to your MIDI keyboard.
