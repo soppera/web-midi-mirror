@@ -22,7 +22,7 @@ compile:
 .PHONY: release
 release:
 	git checkout pages
-	git merge master
+	git merge master -m "Merging latests changes."
 	-git rm -r scripts
 	tsc
 	git add scripts
