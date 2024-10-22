@@ -19,4 +19,12 @@
 compile:
 	tsc
 
+.PHONY: release
+release:
+	git checkout pages
+	git merge master
+	git rm scripts
+	tsc
+	git add scripts
+	git commit -m "Upload compiled scripts."
 
