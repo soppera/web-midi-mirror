@@ -23,7 +23,7 @@ compile:
 release:
 	git checkout pages
 	git merge master
-	-git rm scripts
+	-git rm -r scripts
 	tsc
 	git add scripts
 	git commit -m "Upload compiled scripts."
