@@ -13,17 +13,18 @@ This project is written in TypeScript. It thus needs to be compilated.
 With the current directory at the root of the repository, run:
 
 * `npm install`: Install the TypeScript dependencies.
-* `tsc`: Runs the TypeScript compiler.
+* `make`: Runs the TypeScript compiler and copies the static files.
 
-This will create the `scripts/` folder that contains the compiled
-JavaScript files from the TypeScript files in `src/`.
+This will create the `output/` folder that contains the compiled
+JavaScript files from the TypeScript files in `src/` and copies other
+input files.
 
 ### Running Locally
 
 You need a web-server to be able to use WebMidi. The simplest one is
 the one included in Python. Simply run:
 
-`python3 -m http.server`
+`python3 -m http.server --directory output/`
 
 This will run an HTTP server on port 8000 of all IP addresses of the
 machine. You can then visit http://127.0.0.1:8000 to access it.

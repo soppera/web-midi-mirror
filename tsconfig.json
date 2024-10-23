@@ -18,10 +18,11 @@
  */
 {
   "compilerOptions": {
-    "outDir": "./scripts",
+    "rootDir": "./src",
+    "outDir": "./output/scripts",
     "target": "es2017",
     "strict": true,
     "types": ["webmidi"]
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/scripts/*"]
 }

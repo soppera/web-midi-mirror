@@ -15,16 +15,24 @@
 # You should have received a copy of the GNU General Public License along
 # with web-midi-mirror. If not, see <https://www.gnu.org/licenses/>.
 
+OUTPUT_DIR=./output
+
+.PHONY: all
+all: compile $(OUTPUT_DIR)/index.html $(OUTPUT_DIR)/css/style.css
+
 .PHONY: compile
 compile:
-	tsc
+	tsc --outDir $(OUTPUT_DIR)
 
-.PHONY: release
-release:
-	git checkout pages
-	git merge master -m "Merging latests changes."
-	-git rm -r scripts
-	tsc
-	git add scripts
-	git commit -m "Upload compiled scripts."
+$(OUTPUT_DIR)/index.html: src/index.html
+	mkdir -p $(OUTPUT_DIR)
+	cp src/index.html $(OUTPUT_DIR)/index.html
+
+$(OUTPUT_DIR)/css/style.css: src/css/style.css
+	mkdir -p $(OUTPUT_DIR)/css
+	cp src/css/style.css $(OUTPUT_DIR)/css/style.css
+
+.PHONY: clean
+clean:
+	rm -rf $(OUTPUT_DIR)
 
