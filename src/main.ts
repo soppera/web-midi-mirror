@@ -80,6 +80,45 @@ function format_midi_data(data: Uint8Array): string {
                 const bend = ((data[2] << 7) | data[1]) - 0x2000;
                 return `[${channel}] pitch-bend b:${bend}`;
             }
+        case 0xF0:              // System messages.
+            switch (status_byte & 0xf) {
+                case 0x01:      // Time code quarter frame.
+                    {
+                        if (data.length !== 2) { return data_str(data); }
+                        const sub_msg_type = data[1] >>> 4;
+                        const values = data[1] & 0xF;
+                        return `[sys] time-code-quarter-frame mt:${sub_msg_type} v:${values}`;
+                    }
+                case 0x02:      // Song pointer.
+                    {
+                        if (data.length !== 3) { return data_str(data); }
+                        const pos = ((data[2] << 7) | data[1]) - 0x2000;
+                        return `[sys] song-pointer pos:${pos}`;
+                    }
+                case 0x03:      // Song select.
+                    if (data.length !== 2) { return data_str(data); }
+                    return `[sys] song-select song:${data[1]}`;
+                case 0x06:      // Tune request.
+                    return "[sys] tune-request";
+                case 0x00:
+                    return "[sys] sysex";
+                case 0x07:
+                    return "[sys] end-of-sysex";
+                case 0x08:
+                    return "[sys] clock";
+                case 0x0A:
+                    return "[sys] start";
+                case 0x0B:
+                    return "[sys] continue";
+                case 0x0C:
+                    return "[sys] stop";
+                case 0x0E:
+                    return "[sys] active-sensing";
+                case 0x0F:
+                    return "[sys] reset";
+                default:
+                    return data_str(data);
+            }
         default:
             return data_str(data);
     }
