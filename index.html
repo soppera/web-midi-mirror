@@ -20,12 +20,14 @@ with web-midi-mirror. If not, see <https://www.gnu.org/licenses/>.
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Midi Keyboard Mirror</title>
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <script src="scripts/main.js" type="module"></script>
     <script src="scripts/nomodules.js" nomodule></script>
   </head>
   <body>
+    <div class="version">version <span id="version">ef3a4b5a32dfe8b139519a8a3f7a3c3b1111a116</span></div>
     Input: <select id="input-sel"></select> →
     Output: <select id="output-sel"></select><br>
     Local Control: <button id="disable-local-control" class="on">Disable</button><button id="enable-local-control" class="off">Enable</button>

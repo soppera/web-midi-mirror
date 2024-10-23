@@ -72,3 +72,9 @@ button.off:active {
 .log-msg {
     white-space: pre-wrap;
 }
+
+.version {
+    color: #aaa;
+    font-size: small;
+    text-align: right;
+}
