@@ -165,8 +165,12 @@ class Filter {
         }
         let data = e.data;
         switch (data[0] & 0xf0) {
-            case 0x90:        // note on
-            case 0x80:        // note off
+            case 0xF0:          // System messages.
+                // Ignore system messages as none of them are useful
+                // to mirror.
+                return;
+            case 0x90:          // note on
+            case 0x80:          // note off
                 data = new Uint8Array(data);
                 let n = 124 - data[1];
                 if (n < 0) {
