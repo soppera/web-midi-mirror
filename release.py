@@ -64,6 +64,15 @@ def main() -> None:
         print(f'\n** Creating the output in {tmp_dir!r} running {make_args} in {root_dir!r}…', flush=True)
         subprocess.run(make_args, check=True, cwd=root_dir)
 
+        index_path = os.path.join(tmp_dir, 'index.html')
+        print(f'\n** Patch {index_path!r} to update the version…')
+        with open(index_path, 'rt', encoding='utf-8') as f:
+            index_content = f.read()
+        index_updated_content = index_content.replace('<!--version-start-->?<!--version-end-->', revision)
+        assert index_updated_content != index_content, 'expected changes!'
+        with open(index_path, 'wt', encoding='utf-8') as f:
+            f.write(index_updated_content)
+
         print(f'\n** Switch to the `release` branch…', flush=True)
         subprocess.run(('git', 'switch', 'release'), check=True, cwd=root_dir)
 
